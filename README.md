@@ -51,29 +51,17 @@ You can run FAST-OAD tutorials **without installation** using our
 [Binder-hosted Jupyter notebooks](https://mybinder.org/v2/gh/fast-aircraft-design/FAST-OAD.git/latest-release?filepath=src%2Ffastoad%2Fnotebooks).
 
 
-Install
--------
-
-**Prerequisite**:FAST-OAD needs at least **Python 3.7.0**.
-
-It is recommended (but not required) to install FAST-OAD in a virtual
-environment ([conda](https://docs.conda.io/en/latest/),
-[venv](https://docs.python.org/3.7/library/venv.html), ...)
-
-Once Python is installed, FAST-OAD can be installed using pip.
-
-> **Note**: If your network uses a proxy, you may have to do [some
-> settings](https://pip.pypa.io/en/stable/user_guide/#using-a-proxy-server)
-> for pip to work correctly
-
-You can install the latest version with this command:
-
-``` {.bash}
-$ pip install --upgrade fast-oad
+Dev Instructions
+-----------------
+First, ensure your computer has python, git, and pip.
+Install VS Code or code editor of choice.
+Clone this repo with 
+``` {bash}
+$ git clone https://github.com/meghna-dutta15/FAST-OAD.git
 ```
+Navigate into the directory using command line.
 
-or, if you want the minimum installation without the CS25-related models:
-
-``` {.bash}
-$ pip install --upgrade fast-oad-core
+Download all project dependencies with the following command
+```{bash}
+$ pip install -r requirements.txt
 ```
