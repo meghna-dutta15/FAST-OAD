@@ -1,4 +1,5 @@
 import numpy as np
+import openmdao as om
 
 # import atmospheric parameters
 # import position paramteters, such as geodetic latitude, longitude, and height
@@ -13,5 +14,3 @@ class dynamicsMatrixGeneration:
         self.theta = eulerAngles[1]
         self.psi = eulerAngles[2]
 
-    @property
-    def 
