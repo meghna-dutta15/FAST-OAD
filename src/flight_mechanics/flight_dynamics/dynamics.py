@@ -2,7 +2,9 @@ import numpy as np
 import openmdao as om
 
 # import atmospheric parameters
-# import position paramteters, such as geodetic latitude, longitude, and height
+# import intertia tensor
+# import force and moment coefficients
+# 
 
 class dynamicsMatrixGeneration:
     def __init__(
