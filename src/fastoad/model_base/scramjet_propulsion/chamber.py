@@ -32,5 +32,5 @@ def chamber_solver(Min, pin, rin, Tin, rf, vf, Tf, cpin, cpf, cpc, A, mdotf, hf,
 
     return x[0], x[1], x[2], x[3]
 
-print(chamber_solver(2, 10000, 5, 300, 50, 1000, 150, 1004, 800, 13120, 1, 0.01, 141584*1000))
+
 

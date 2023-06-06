@@ -27,7 +27,7 @@ def oblique(M1, p1, r1, T1, theta, gamma=1.4):
 # print(M3, beta3, p3, r3, T3)
 
 
-def expansion(M1, p1, r1, T1, theta, gamma=1.4):
+def pm_expansion(M1, p1, r1, T1, theta, gamma=1.4):
     def prandtl_meyer(M):
         vM = ((gamma+1)/(gamma-1))**0.5 * np.arctan( ((gamma-1)/(gamma+1)*((M**2)-1))**0.5 ) - np.arctan(((M**2)-1)**0.5)
         return vM
