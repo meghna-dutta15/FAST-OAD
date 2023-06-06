@@ -9,8 +9,13 @@ from math import sec
 from math import sqrt
 
 # import atmospheric parameters
-# import intertia tensor
 # import force and moment coefficients
+# import weight distribution parameters (inertia tensor, center of gravity, vehicle mass, and more)
+
+# General thoughts:
+# - Where is the origin of the aircraft?
+# - The functions must be simplified, i.e. make matrices and performs matrix multiplications etc, if possible
+# - Nicely import relevant parameters and their value from other WPs and name them, how?
 
 # Parameters TODO: will be changed for when looping
 # intertias defined as per mass [kg/m^2/kg]
