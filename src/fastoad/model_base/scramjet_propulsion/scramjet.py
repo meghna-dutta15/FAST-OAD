@@ -7,7 +7,7 @@ from shocks import oblique, pm_expansion
 # previously and perform the necessary calculations to find thrust and everything else. Perhaps then we can have a child class
 # which is the interface between this and the other WPs. 
 
-#List of param keys used: M_freestream, p_freestream, r_freestream, T_freestream, theta_1, gamma_inlet, theta_2, R, r_fuel, v_fuel, T_fuel, cp_inlet, cp_fuel, cp_combustor, mdot_fuel, hf, gamma_combustor, theta_outlet, gamma_outlet
+#List of param keys used: M_freestream, p_freestream, r_freestream, T_freestream, theta_1, gamma_inlet, theta_2, theta_3, R, r_fuel, v_fuel, T_fuel, cp_inlet, cp_fuel, cp_combustor, ER, hf, gamma_combustor, theta_outlet, gamma_outlet, A
 
 
 class scramjet:
@@ -33,9 +33,11 @@ class scramjet:
         a = (self.params['gamma_inlet'] * self.params['R'] * T4)**0.5
         vin = M4*a
         self.inlet_velocity = vin
+        mdot_inlet = r4*self.params['A']*vin
+        self.inlet_mdot = mdot_inlet
 
     def combustor(self):
-        p2, v2, r2, T2 = chamber_solver(self.inlet_mach, self.inlet_pressure, self.inlet_density, self.inlet_temperature, self.params['r_fuel'], self.params['v_fuel'], self.params['T_fuel'], self.params['cp_inlet'], self.params['cp_fuel'], self.params['cp_combustor'], self.params['A'], self.params['mdot_fuel'], self.params['hf'], self.params['gamma_combustor'], self.params['R'] )
+        p2, v2, r2, T2 = chamber_solver(self.inlet_mach, self.inlet_pressure, self.inlet_density, self.inlet_temperature, self.params['r_fuel'], self.params['v_fuel'], self.params['T_fuel'], self.params['cp_inlet'], self.params['cp_fuel'], self.params['cp_combustor'], self.params['A'], self.params['ER']*self.inlet_mdot, self.params['hf'], self.params['gamma_combustor'], self.params['R'] )
         self.outlet_pressure = p2
         self.outlet_velocity = v2
         self.outlet_density = r2
@@ -43,9 +45,10 @@ class scramjet:
         a = (self.params['gamma_combustor'] * self.params['R'] * T2)**0.5
         M2 = v2 / a
         self.outlet_mach = M2
+        self.mdot_fuel = self.params['ER']*self.inlet_mdot
 
     def nozzle(self):
-        M2, p2, r2, T2 = pm_expansion(self.outlet_mach, self.outlet_pressure, self.outlet_density, self.outlet_temperature, self.params['theta_outlet'], self.params['gamma_outlet'])
+        M2, p2, r2, T2 = pm_expansion(self.outlet_mach, self.outlet_pressure, self.outlet_density, self.outlet_temperature, self.params['theta_outlet'], self.params['gamma_combustor'])
         Mout, Tout, pout, rout = M_2(p2, self.params['p_freestream'], M2, T2, self.params['gamma_outlet'], self.params['R'])
         self.exhaust_mach = M2
         self.exhaust_temperature = Tout
@@ -59,6 +62,6 @@ class scramjet:
         mdot_inlet = self.inlet_density*self.params['A']*self.inlet_velocity
         a_freestream = (self.params['gamma_inlet'] * self.params['R'] * self.params['T_freestream'])**0.5
         v_freestream = self.params['M_freestream']*a_freestream
-        F = (mdot_inlet + self.params['mdot_fuel'])*self.exhaust_velocity - mdot_inlet*v_freestream
+        F = (mdot_inlet + self.mdot_fuel)*self.exhaust_velocity - mdot_inlet*v_freestream
         self.engine_thrust = F
 
