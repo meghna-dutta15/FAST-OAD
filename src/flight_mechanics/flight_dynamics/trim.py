@@ -67,9 +67,9 @@ class DiffEqs(om.ExplicitComponent):
 
 
             ## TODO: add the functions
-            u_dot = -g*sin(theta)+1/vehicle_mass*(1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_planform_area *(-force_coefficients.D*atan(w/u)))
-            w_dot = g*cos(phi)*cos(theta)+1/vehicle_mass*1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_planform_area*(-force_coefficients.L*atan(w/u))
-            q_dot = 1/vehicle_mass*(inertia.yy*1/2*rho*sqrt(u**2+w**2)*vehicle_chord*vehicle_planform_area*(CM) + 1/2*rho*sqrt(u**2+w**2)*vehicle_planform_area*((position_aerodynamic_center.x-position_center_of_gravity.x)*force_coefficients.L - (position_aerodynamic_center.z-position_center_of_gravity.z)*force_coefficients.D) (position_center_of_thrust.z-position_center_of_gravity.z) * thrust.x)
+            u_dot = -g*sin(theta)+1/vehicle_mass*(1/2*rho*sqrt(u**2+w**2)*vehicle_planform_area*(-force_coefficients.D*(w/u)) + thrust.x)
+            w_dot = g*cos(phi)*cos(theta)+1/vehicle_mass*1/2*rho*sqrt(u**2+w**2)*vehicle_planform_area*(-force_coefficients.L*atan(w/u))
+            q_dot = 1/vehicle_mass*(inertia.yy*1/2*rho*sqrt(u**2+w**2)*vehicle_chord*vehicle_planform_area*(8.1576*10**(-8)*(w/u)**4 - 3.3297*10**(-6)*(w/u)**3 - 9.7364*10**(-6)*(w/u)**2 - 0.00051529*(w/u) + 0.00016104) + 1/2*rho*sqrt(u**2+w**2)*vehicle_planform_area*((position_aerodynamic_center.x-position_center_of_gravity.x)*force_coefficients.L - (position_aerodynamic_center.z-position_center_of_gravity.z)*force_coefficients.D) (position_center_of_thrust.z-position_center_of_gravity.z) * thrust.x)
             
 
             # v_dot = g*sin(phi)*cos(theta)+1/vehicle_mass*1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_planform_area*(-force_coefficients.N*asin(v/sqrt(u**2+v**2+w**2)))
