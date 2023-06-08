@@ -22,7 +22,7 @@ def chamber_solver(Min, pin, rin, Tin, rf, vf, Tf, cpin, cpf, cpc, A, mdotf, hf,
         Tt1 = Tin + (vin**2)/(2*cpin)
         Tt2 = T2 + (v2**2)/(2*cpc)
         Ttf = Tf + (vf**2)/(2*cpf)
-        zero3 = (mdotin+mdotf)*cpc*Tt2 - mdotin*cpin*Tt1 - 0.5*mdotf*hf  - mdotf*cpf*Ttf
+        zero3 = (mdotin+mdotf)*cpc*Tt2 - mdotin*cpin*Tt1 - mdotf*hf  - mdotf*cpf*Ttf
         
         zero4 = r2*R*T2 - p2
 

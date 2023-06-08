@@ -1,6 +1,7 @@
 from chamber import chamber_solver
 from isentropic_expansion import M_2
 from shocks import oblique, pm_expansion
+from rayleigh import mach_2_calculation
 
 
 #Idea is to have this parent class take an input of a dictionary with all parameters needed. It will call the functions created
@@ -37,14 +38,23 @@ class scramjet:
         self.inlet_mdot = mdot_inlet
 
     def combustor(self):
-        p2, v2, r2, T2 = chamber_solver(self.inlet_mach, self.inlet_pressure, self.inlet_density, self.inlet_temperature, self.params['r_fuel'], self.params['v_fuel'], self.params['T_fuel'], self.params['cp_inlet'], self.params['cp_fuel'], self.params['cp_combustor'], self.params['A'], self.params['ER']*self.inlet_mdot, self.params['hf'], self.params['gamma_combustor'], self.params['R'] )
+        # p2, v2, r2, T2 = chamber_solver(self.inlet_mach, self.inlet_pressure, self.inlet_density, self.inlet_temperature, self.params['r_fuel'], self.params['v_fuel'], self.params['T_fuel'], self.params['cp_inlet'], self.params['cp_fuel'], self.params['cp_combustor'], self.params['A'], self.params['ER']*self.inlet_mdot, self.params['hf'], self.params['gamma_combustor'], self.params['R'] )
+        # self.outlet_pressure = p2
+        # self.outlet_velocity = v2
+        # self.outlet_density = r2
+        # self.outlet_temperature = T2
+        # a = (self.params['gamma_combustor'] * self.params['R'] * T2)**0.5
+        # M2 = v2 / a
+        # self.outlet_mach = M2
+
+        p2, M2, r2, T2 = mach_2_calculation(self.inlet_mach, self.inlet_pressure, self.inlet_density, self.inlet_temperature, self.params['r_fuel'], self.params['v_fuel'], self.params['T_fuel'], self.params['cp_inlet'], self.params['cp_fuel'], self.params['cp_combustor'], self.params['A'], self.params['ER']*self.inlet_mdot, self.params['hf'], self.params['gamma_combustor'], self.params['R'] )
         self.outlet_pressure = p2
-        self.outlet_velocity = v2
+        self.outlet_mach = M2
         self.outlet_density = r2
         self.outlet_temperature = T2
         a = (self.params['gamma_combustor'] * self.params['R'] * T2)**0.5
-        M2 = v2 / a
-        self.outlet_mach = M2
+        self.outlet_velocity = M2*a
+
         self.mdot_fuel = self.params['ER']*self.inlet_mdot
 
     def nozzle(self):
