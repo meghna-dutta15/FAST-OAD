@@ -58,8 +58,8 @@ class MatrixSystem(om.Group):
 
 class DiffEqs(om.ExplicitComponent):
         def setup(self):
-            self.add_input('x', shape=9)
-            self.add_output('y', shape=9)
+            self.add_input('x', shape=4)
+            self.add_output('y', shape=4)
         
         def compute(self, inputs, outputs):
             x = inputs['x']
@@ -67,9 +67,13 @@ class DiffEqs(om.ExplicitComponent):
 
 
             ## TODO: add the functions
+            h_dot = sqrt(u**2+w**2)*sin(theta-(w/u))
             u_dot = -g*sin(theta)+1/vehicle_mass*(1/2*rho*sqrt(u**2+w**2)*vehicle_planform_area*(-force_coefficients.D*(w/u)) + thrust.x)
             w_dot = g*cos(phi)*cos(theta)+1/vehicle_mass*1/2*rho*sqrt(u**2+w**2)*vehicle_planform_area*(-force_coefficients.L*atan(w/u))
-            q_dot = 1/vehicle_mass*(inertia.yy*1/2*rho*sqrt(u**2+w**2)*vehicle_chord*vehicle_planform_area*(8.1576*10**(-8)*(w/u)**4 - 3.3297*10**(-6)*(w/u)**3 - 9.7364*10**(-6)*(w/u)**2 - 0.00051529*(w/u) + 0.00016104) + 1/2*rho*sqrt(u**2+w**2)*vehicle_planform_area*((position_aerodynamic_center.x-position_center_of_gravity.x)*force_coefficients.L - (position_aerodynamic_center.z-position_center_of_gravity.z)*force_coefficients.D) (position_center_of_thrust.z-position_center_of_gravity.z) * thrust.x)
+            q_dot = 1/vehicle_mass*(inertia.yy*1/2*rho*sqrt(u**2+w**2)*vehicle_chord*vehicle_planform_area \ 
+            * (8.1576*10**(-8)*(w/u)**4 - 3.3297*10**(-6)*(w/u)**3 - 9.7364*10**(-6)*(w/u)**2 - 0.00051529*(w/u) + 0.00016104) \ 
+            + 1/2*rho*sqrt(u**2+w**2)*vehicle_planform_area*((position_aerodynamic_center.x-position_center_of_gravity.x)*force_coefficients.L \
+            - (position_aerodynamic_center.z-position_center_of_gravity.z)*force_coefficients.D) * (position_center_of_thrust.z-position_center_of_gravity.z) * thrust.x)
             
 
             # v_dot = g*sin(phi)*cos(theta)+1/vehicle_mass*1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_planform_area*(-force_coefficients.N*asin(v/sqrt(u**2+v**2+w**2)))
@@ -80,15 +84,15 @@ class DiffEqs(om.ExplicitComponent):
             # q_dot = inertia.yy*1/vehicle_mass* ( 1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_chord*vehicle_planform_area*moment_coefficients.m*asin(v/sqrt(u**2+v**2+w**2)) + 1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_planform_area*(-(position_aerodynamic_center.z-position_center_of_gravity.z)*force_coefficients.D*atan(w/u) + (position_aerodynamic_center.x-position_center_of_gravity.x)*force_coefficients.L*atan(w/u)) + (position_center_of_thrust.z-position_center_of_gravity.z)*thrust.x)
             # r_dot = inertia.xz*1/vehicle_mass* ( 1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_chord*vehicle_planform_area*moment_coefficients.l*atan(w/u) + 1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_planform_area*((position_aerodynamic_center.z-position_center_of_gravity.z)*force_coefficients.N*asin(v/sqrt(u**2+v**2+w**2)) - (position_aerodynamic_center.y-position_center_of_gravity.y)*force_coefficients.L*atan(w/u))) + inertia.zz*1/vehicle_mass* ( 1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_chord*vehicle_planform_area*moment_coefficients.n*atan(w/u) + 1/2*rho*sqrt(u**2+v**2+w**2)*vehicle_planform_area*((position_aerodynamic_center.y-position_center_of_gravity.y)*force_coefficients.D*atan(w/u) - (position_aerodynamic_center.x-position_center_of_gravity.x)*force_coefficients.N*asin(v/sqrt(u**2+v**2+w**2))) - (position_center_of_thrust.y-position_center_of_gravity.y)*thrust.x)
 
-
-            y[0] = u_dot
-            y[1] = w_dot
-            y[2] = q_dot
+            y[0] = h_dot
+            y[1] = u_dot
+            y[2] = w_dot
+            y[3] = q_dot
 
 
 class ObjectiveComponent(om.ExplicitComponent):
     def setup(self):
-        self.add_input('y', shape=9)
+        self.add_input('y', shape=4)
         self.add_output('obj')
 
     def compute(self, inputs, outputs):
@@ -100,12 +104,12 @@ class ObjectiveComponent(om.ExplicitComponent):
         prob.model = om.NonlinearSystem()
 
         # Set the initial values for the variables
-        prob['x'] = np.zeros(9)
+        prob['x'] = np.zeros(4)
 
         prob.driver = om.pyOptSparseDriver()
         prob.driver.options['optimizer'] = 'SLSQP'
 
-        trim = [0, 0, 0, 0, 0, 0]
+        trim = [0, 0, 0, 0]
         for i, target in enumerate(trim):
             prob.model.add_objective('objective.obj[{}]'.format(i), scaler=1.0, target=target)
 
