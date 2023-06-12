@@ -28,7 +28,7 @@ from scipy.optimize import root_scalar as root
 def M_2(P_1, P_2, M_1, T_1, gamma=1.4, R=287.05):
     gamma_1 = 2/(gamma-1)
     P_1_2 = (P_2/P_1)**((1-gamma)/gamma)
-    M_2 = ((gamma_1)*(1-((P_1_2)*(1 + ((M_1*M_1)/(gamma_1)   ))))**(0.5))
+    M_2 = ((gamma_1)*(1-((P_1_2)*(-( + ((M_1*M_1)/(gamma_1))   ))))**(0.5))
 
     T_2 = (T_1*(1 + ((M_1*M_1)/(gamma_1)))) / ((1 + ((M_2*M_2)/(gamma_1))))
     r_2 = P_2 / (R*T_2)
