@@ -6,9 +6,10 @@ def mach_2_calculation(Min, pin, rin, Tin, rf, vf, Tf, cpin, cpf, cpc, A, mdotf,
     mdotin = rin*A*vin
     Ttf = Tf + (vf**2)/(2*cpf)
     T_t_1 = Tin + (vin**2)/(2*cpin)
-    q = mdotf*hf + mdotf*cpf*Ttf
+    eta = 0.65
+    q = (mdotf*hf + mdotf*cpf*Ttf)*eta
     #T_t_2 = (q/cpf) + T_t_1
-    T_t_2 = (mdotin*cpin*T_t_1 + mdotf*hf  + mdotf*cpf*Ttf) / ((mdotin+mdotf)*cpc)
+    T_t_2 = (mdotin*cpin*T_t_1 + q) / ((mdotin+mdotf)*cpc)
 
     def get_rayleigh_stag_temperature_ratio(mach_1, mach_2, gamma=1.4):
         '''Return Tt2/Tt1 for Rayleigh flow'''
