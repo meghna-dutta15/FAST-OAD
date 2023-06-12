@@ -6,7 +6,7 @@ def mach_2_calculation(Min, pin, rin, Tin, rf, vf, Tf, cpin, cpf, cpc, A, mdotf,
     mdotin = rin*A*vin
     Ttf = Tf + (vf**2)/(2*cpf)
     T_t_1 = Tin + (vin**2)/(2*cpin)
-    eta = 0.65
+    eta = 0.78
     q = (mdotf*hf + mdotf*cpf*Ttf)*eta
     #T_t_2 = (q/cpf) + T_t_1
     T_t_2 = (mdotin*cpin*T_t_1 + q) / ((mdotin+mdotf)*cpc)

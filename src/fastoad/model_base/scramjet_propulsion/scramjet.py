@@ -35,6 +35,9 @@ class scramjet:
         vin = M4*a
         self.inlet_velocity = vin
         mdot_inlet = r4*self.params['A']*vin
+        # a_freestream = (self.params['gamma_inlet'] * self.params['R'] * self.params['T_freestream'])**0.5
+        # v_freestream = self.params['M_freestream']*a_freestream
+        # mdot_inlet = self.params['r_freestream']*(v_freestream)*0.787
         self.inlet_mdot = mdot_inlet
 
     def combustor(self):
@@ -60,7 +63,7 @@ class scramjet:
     def nozzle(self):
         M2, p2, r2, T2 = pm_expansion(self.outlet_mach, self.outlet_pressure, self.outlet_density, self.outlet_temperature, self.params['theta_outlet'], self.params['gamma_combustor'])
         Mout, Tout, pout, rout = M_2(p2, self.params['p_freestream'], M2, T2, self.params['gamma_outlet'], self.params['R'])
-        self.exhaust_mach = M2
+        self.exhaust_mach = Mout
         self.exhaust_temperature = Tout
         self.exhaust_pressure = pout
         self.exhaust_density = rout
@@ -69,9 +72,10 @@ class scramjet:
         self.exhaust_velocity = vout
 
     def thrust(self):
-        mdot_inlet = self.inlet_density*self.params['A']*self.inlet_velocity
         a_freestream = (self.params['gamma_inlet'] * self.params['R'] * self.params['T_freestream'])**0.5
         v_freestream = self.params['M_freestream']*a_freestream
-        F = (mdot_inlet + self.mdot_fuel)*self.exhaust_velocity - mdot_inlet*v_freestream
+        #F = self.exhaust_density*0.787*self.exhaust_velocity**2 - self.params['r_freestream']*(v_freestream**2)*0.787
+        self.returnable = self.params['r_freestream']*(v_freestream)*0.787
+        F = (self.inlet_mdot + self.mdot_fuel)*self.exhaust_velocity - self.inlet_mdot*v_freestream
         self.engine_thrust = F
 
