@@ -123,3 +123,76 @@ class ObjectiveComponent(om.ExplicitComponent):
         print('x:', prob['x'])
         print('y:', prob['y'])
         print('Objective:', prob['obj'])
+
+# This part of the code is for construction of the dynamics matrix, you (Meghna) said that
+# the matrix components are inputed seperatley to a function that calculates the eigenvalues.
+# I have therefore listed all the components here:
+
+# ---Necessary parameters (hard brackets denote parameter [name])---
+# - [gamma] - ratio of specific heats
+# - [mach] - free stream Mach number
+# - [pressure_freestream] - free stream static pressure
+# - [Cpn] - pressure coefficient
+# - [dP_dH] - free stream pressure derived w.r.t altitude
+# - [theta_L] - nominal-flow deflection angle (from Propulsion WP): equal to first panel deflection!(?) or alpha
+# - [h] - vehicle height
+# - [alpha_0] - trim alpha
+# - [delta_0] - trim elevator deflection
+# - [S_es] - combined elevator area
+# - [b] - vehicle width parameter
+# - [rho] - free stream density
+# - [V_infty] - free stream velocity
+# - [z_bar] - z distance to vehicle mass center from z_min of vehicle
+# - [x_bar] - x distance to vehicle mass center from x_max of vehicle
+# - [l_1] - inlet ramp length
+# - [L_1] - inlet ramp length projected on x
+# - [l_2] - outlet ramp length
+# - [L_2] - outlet ramp length projected on x
+# - [dTh_dMach] - thrust derived w.r.t Mach number
+# - [dTh_dtheta_L] - thrust derived w.r.t nominal-flow deflection angle
+# - [dPe_dMach] - internal nozzle exit pressure derived w.r.t to Mach number
+# - [dPe_dtheta_L] - internal nozzle exit pressure derived w.r.t to nominal-flow deflection angle
+# - [P_bar] - pressure ratio, Pe/pressure_freeastram
+# - [I_1] - function of P_bar
+# - [I_2] - function of P_bar
+
+# ---A bit further notations mainly for me (Marcus) to keep up---
+# Cpn: pressure coefficient used in stability derivateves calculations, always equal to 2 §Chavez
+# theta_L_ equal to first panel deflection!(?) or alpha
+# h refers to vehicle height and H to flight altitude
+# b: is used i §Chavez as the vehicle width parameter, all moments, forces, intertias, and masses are normalized w it
+# V_infty: u_0 (u vel projected on x_vel) or sqrt(u^2+w^2)
+# x_bar and z_bar, need to define origin of aircraft
+# l_1 and L_1, assumed to be one panel for aircraft instead of two which it actually is
+# dTh_ thrust
+# dP: pressure at internal nozzle exit
+# I_1 = [(P_bar-1)-ln(P_bar)]/(P_bar-1)^2
+# I_2 = [(P_bar+1)*ln(P_bar)-2*(P_bar-1)]/(P_bar-1)^3
+
+# example values used for writing of the stability derivative equations (defining variables)
+gamma = 1.4
+M = 8
+pressure_static = 1090      #[Pa]
+Cpn = 2
+Dp_dH = -0.1765             #[pa/m]
+theta_L = 0.2618            #[rad] = 15deg
+h = 15                      #[m]
+alpha_0 = -0.0349           #[rad] = -2deg
+delta_0 = 0                 #[rad] = 0deg
+S_es = 20                   #[m^2] ~0.6% of planform area
+b = 60                      #[m]
+rho = 0.018                 #[kg/m^3] at 30000 meters
+V_infty = 2414.2            #[m/s] at 30000 meters
+z_bar = h/2                 #[m]---negative?
+x_bar = 70                  #[m]---negative?
+l_1 = 64                    #[m] should be: l_1 = (aircraft length)*(inlet fraction)/cos(arctan(h/L*(inlet fraction))) where L is length of aircraft
+L_1 = 60                    #[m] should be: L_1 = (aircraft length)*(inlet fraction)
+l_2 = 50                    #[m] should be: l_2 = (aircraft length)*(outlet fraction)/cos(arctan(h/L*(outlet fraction)))
+L_2 = 40                    #[m] should be: L_1 = (aircraft length)*(inlet fraction)
+dTh_dMach = 50000           #[N/Mach]
+dTh_dtheta_L = -100         # I have no idea for this
+dPe_dMach = 0.5             # I have no idea for this
+dPe_dtheta_L = 0.05         # I have no idea for this
+P_bar = 10
+I_1 = 3                     # I have no idea for this
+I_2 = 2                     # I have no idea for this
