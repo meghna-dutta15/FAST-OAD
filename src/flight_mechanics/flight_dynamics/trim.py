@@ -170,6 +170,8 @@ class ObjectiveComponent(om.ExplicitComponent):
 # I_2 = [(P_bar+1)*ln(P_bar)-2*(P_bar-1)]/(P_bar-1)^3
 
 # example values used for writing of the stability derivative equations (defining variables)
+u0 = 2400
+w0 = 50
 gamma = 1.4
 M = 8
 pressure_static = 1090      #[Pa]
@@ -180,6 +182,8 @@ h = 15                      #[m]
 alpha_0 = -0.0349           #[rad] = -2deg
 delta_0 = 0                 #[rad] = 0deg
 S_es = 20                   #[m^2] ~0.6% of planform area
+x_es = -39                  #[m] elevator x position w.r.t cog
+z_es = 0                    #[m] elevator z position w.r.t cog
 b = 60                      #[m]
 rho = 0.018                 #[kg/m^3] at 30000 meters
 V_infty = 2414.2            #[m/s] at 30000 meters
@@ -196,3 +200,89 @@ dPe_dtheta_L = 0.05         # I have no idea for this
 P_bar = 10
 I_1 = 3                     # I have no idea for this
 I_2 = 2                     # I have no idea for this
+
+q = 0.5*rho*(sqrt(u0**2+w0**2))**2
+V_inf = 0.5*rho*(sqrt(u0**2+w0**2))**2
+
+# Aerodynamic stability derivatives
+X_A_Minf = -gamma*M*pressure_static*Cpn*(sin(theta_L)**2*h+sin(alpha_0+delta_0)**2*sin(delta_0)*S_es/b)
+
+X_A_alpha = -q*Cpn*(sin(2*theta_L)*h+sin(2*(alpha_0+delta_0))*sin(delta_0)*S_es/b)
+
+X_A_q = q*Cpn*sin(2*theta_L)*h/V_inf*((h-z_bar)*sin(alpha_0)- \
+(L_1-x_bar)*cos(alpha_0) + 0.5*l_1*cos(theta_L))
+
+Z_A_Minf = -gamma*M*pressure_static*Cpn*(sin(theta_L)**2*L_1+sin(alpha_0+delta_0)**2*cos(delta_0)*S_es/b)
+
+Z_A_alpha = -q*Cpn*(sin(2*theta_L)*L_1+sin(2*(alpha_0+delta_0))*cos(delta_0)*S_es/b)
+
+Z_A_q = q*Cpn*sin(2*theta_L)*L_1/V_inf*((h-z_bar)*sin(alpha_0)- \
+(L_1-x_bar)*cos(alpha_0) + 0.5*l_1*cos(theta_L))
+
+M_A_Minf = pressure_static*gamma*M*Cpn*( sin(theta_L)**2*(0.5*l_1**2-(L_1-x_bar)*L_1-(h-z_bar)*h)+ \
+sin(alpha_0+delta_0)**2*(x_es*cos(delta_0)-z_es*sin(delta_0))*S_es/b )
+
+M_A_alpha = q*Cpn*( sin(2*theta_L)*(0.5*l_1**2-(L_1-x_bar)*L_1-(h-z_bar)*h)+ \
+sin(2*(alpha_0+delta_0))*(x_es*cos(delta_0)-z_es*sin(delta_0))*S_es/b )
+
+M_A_q = -0.5*q*Cpn*sin(2*theta_L)*( l_1**2/V_inf*(2/3*l_1*cos(theta_L)- \ 
+(L_1-x_bar)*cos(alpha_0)+(h-z_bar)*sin(alpha_0))-z_bar/V_inf*(L_1*(L_1-x_bar)+ \ 
+h*(h*z_bar))*(0.5*l_1*cos(theta_L)-(L-x_bar)*cos(alpha_0)+(h-z_bar)*sin(alpha_0)) )
+
+# Engine-thrust stability derivatives
+X_T_Minf = dTh_dMach
+X_T_alpha = dTh_dtheta_L
+X_T_q = -1/V_inf*((h*z_bar))*dTh_dtheta_L
+
+Z_T_Minf = 0
+Z_T_alpha = 0
+Z_T_q = 0
+
+M_T_Minf = (h-z_bar)*dTh_dMach
+M_T_alpha = (h-z_bar)*dTh_dtheta_L
+M_T_q = -1/V_inf*((h*z_bar))*(h-z_bar)*dTh_dtheta_L
+
+# External nozzle stability derivatives
+X_E_Minf = h*I_1*dPe_dMach
+X_E_alpha = h*I_1*dPe_dtheta_L
+X_E_q = -h/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*I_1*dPe_dtheta_L
+
+Z_E_Minf = -L_2*I_1*dPe_dMach
+Z_E_alpha = -L_2*I_1*dPe_dtheta_L
+Z_E_q = L_2/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*I_1*dPe_dtheta_L
+
+M_E_Minf = (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dMach
+M_E_alpha = (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dtheta_L
+M_E_q = -1/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))* \
+(((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dtheta_L
+
+# Components to dynamics matrix A
+a11 = 0
+a12 = 0
+a13 = 0
+a14 = 0
+a15 = 0
+
+a21 = (X_A_Minf+X_T_Minf+X_E_Minf)/vehicle_mass
+a22 = (X_A_alpha+X_T_alpha+X_E_alpha)/vehicle_mass
+a23 = (X_A_q+X_T_q+X_E_q)/vehicle_mass
+a24 = 0
+a25 = 0
+
+a31 = (Z_A_Minf+Z_T_Minf+Z_E_Minf)/(vehicle_mass*u0)
+a32 = (Z_A_alpha+Z_T_alpha+Z_E_alpha)/(vehicle_mass*u0)
+a33 = (Z_A_q+Z_T_q+Z_E_q)/(vehicle_mass*u0)
+a34 = 0
+a35 = 0
+
+a41 = 0
+a42 = 0
+a43 = 0
+a44 = 0
+a45 = 0
+
+a31 = (M_A_Minf+M_T_Minf+M_E_Minf)/inertia.yy
+a32 = (M_A_alpha+M_T_alpha+M_E_alpha)/inertia.yy
+a33 = (M_A_q+M_T_q+M_E_q)/inertia.yy
+a34 = 0
+a35 = 0
