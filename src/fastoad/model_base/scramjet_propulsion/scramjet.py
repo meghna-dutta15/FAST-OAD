@@ -12,7 +12,7 @@ import numpy as np
 #List of param keys used: M_freestream, p_freestream, r_freestream, T_freestream, theta_1, gamma_inlet, theta_2, theta_3, R, r_fuel, v_fuel, T_fuel, cp_inlet, cp_fuel, cp_combustor, ER, hf, gamma_combustor, theta_outlet, gamma_outlet, A
 
 
-class scramjet():
+class scramjet_calculations():
     def __init__(self, scale_factors, input_vals):
         self.geo = scale_factors
         self.vals = input_vals
@@ -95,4 +95,17 @@ class scramjet():
         self.returnable = self.params['r_freestream']*(v_freestream)*0.787
         F = (self.inlet_mdot + self.mdot_fuel)*self.exhaust_velocity - self.inlet_mdot*v_freestream
         self.engine_thrust = F
+
+class scramjet(scramjet_calculations):
+    def __init__(self, scale_factors, input_vals):
+      super().__init__(scale_factors, input_vals)
+
+    def run(self):
+        super().define_geometry()
+        super().inlet()
+        super().combustor()
+        super().nozzle()
+        super().thrust()
+
+
 
