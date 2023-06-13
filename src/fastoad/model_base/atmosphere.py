@@ -26,6 +26,7 @@ AIR_GAS_CONSTANT = R / AIR_MOLAR_MASS
 SEA_LEVEL_PRESSURE = atmosphere
 SEA_LEVEL_TEMPERATURE = 288.15
 TROPOPAUSE = 11000
+UPPERSTRAT = 20000
 
 
 @deprecated(
@@ -82,7 +83,8 @@ class Atmosphere:
 
         # Sets indices for tropopause
         self._idx_tropo = self._altitude < TROPOPAUSE
-        self._idx_strato = self._altitude >= TROPOPAUSE
+        self._idx_ustrato = self._altitude >= UPPERSTRAT 
+        self._idx_strato = (self._altitude >= TROPOPAUSE and self._altitude <UPPERSTRAT)
 
         # Outputs
         self._temperature = None
@@ -123,6 +125,7 @@ class Atmosphere:
                 SEA_LEVEL_TEMPERATURE - 0.0065 * self._altitude[self._idx_tropo] + self._delta_t
             )
             self._temperature[self._idx_strato] = 216.65 + self._delta_t
+            self._temperature[self._idx_ustrato] = 288.15*(0.682457 + self._altitude[self._idx_ustrato]/288136) #141.94 + 0.00299 * self._altitude[self._idx_ustrato] + self.delta_t
         return self._return_value(self._temperature)
 
     @property
@@ -136,6 +139,10 @@ class Atmosphere:
             )
             self._pressure[self._idx_strato] = 22632 * 2.718281 ** (
                 1.7345725 - 0.0001576883 * self._altitude[self._idx_strato]
+            )
+            self._pressure[self._idx_ustrato] = (
+                SEA_LEVEL_PRESSURE 
+                * (0.988626 + (self._altitude[self._idx_ustrato] / 198903)) ** -34.16319
             )
         return self._return_value(self._pressure)
 
@@ -264,3 +271,7 @@ class AtmosphereSI(Atmosphere):
     def altitude(self):
         """Altitude in meters."""
         return self.get_altitude(altitude_in_feet=False)
+
+ninty = Atmosphere(90000)
+ninty.pressure
+ninty.temperature
