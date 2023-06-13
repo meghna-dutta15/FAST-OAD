@@ -2,6 +2,7 @@ from chamber import chamber_solver
 from isentropic_expansion import M_2
 from shocks import oblique, pm_expansion
 from rayleigh import mach_2_calculation
+import numpy as np
 
 
 #Idea is to have this parent class take an input of a dictionary with all parameters needed. It will call the functions created
@@ -11,9 +12,25 @@ from rayleigh import mach_2_calculation
 #List of param keys used: M_freestream, p_freestream, r_freestream, T_freestream, theta_1, gamma_inlet, theta_2, theta_3, R, r_fuel, v_fuel, T_fuel, cp_inlet, cp_fuel, cp_combustor, ER, hf, gamma_combustor, theta_outlet, gamma_outlet, A
 
 
-class scramjet:
-    def __init__(self, input_dict):
-        self.params = input_dict
+class scramjet():
+    def __init__(self, scale_factors, input_vals):
+        self.geo = scale_factors
+        self.vals = input_vals
+
+    def define_geometry(self):
+        x_default = np.array([0, 2.68165, 4.05500, 3.75976, 5.65000, 8.00000])
+        y_default = np.array([0, 0.26383, 0.73307, 1, 0.73307, 0])
+
+        x = x_default*self.geo['x_scale']
+        y = y_default*self.geo['y_scale']
+
+        theta1 = np.arctan2(y[1], x[1])
+        theta2 = np.arctan2(y[2]-y[1], x[2]-x[1]) - theta1
+        theta3 = np.arctan2(y[2]-y[1], x[2]-x[1])
+        theta_outlet = np.arctan2(y[4]-y[5], x[5]-x[4])
+        A = y[3] - y[2]
+
+        self.params = {'M_freestream': self.vals['M_freestream'], 'p_freestream':self.vals['p_freestream'], 'r_freestream':self.vals['r_freestream'], 'T_freestream':self.vals['T_freestream'], 'theta_1':theta1, 'gamma_inlet':self.vals['gamma_inlet'], 'theta_2':theta2, 'theta_3':theta3, 'R':self.vals['R'], 'r_fuel':self.vals['r_fuel'], 'v_fuel':self.vals['v_fuel'], 'T_fuel':self.vals['T_fuel'], 'cp_inlet':self.vals['cp_inlet'], 'cp_fuel':self.vals['cp_fuel'], 'cp_combustor':self.vals['cp_combustor'], 'ER':self.vals['ER'], 'hf':self.vals['hf'], 'gamma_combustor':self.vals['gamma_combustor'], 'theta_outlet':theta_outlet, 'gamma_outlet':self.vals['gamma_outlet'], 'A':A}
 
     def inlet(self):
         #First deflection
