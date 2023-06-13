@@ -7,6 +7,7 @@ from math import tan
 from math import atan
 from math import sec
 from math import sqrt
+from math import log 
 
 # import atmospheric parameters
 # import force and moment coefficients
@@ -148,11 +149,13 @@ class ObjectiveComponent(om.ExplicitComponent):
 # - [L_1] - inlet ramp length projected on x
 # - [l_2] - outlet ramp length
 # - [L_2] - outlet ramp length projected on x
-# - [dTh_dMach] - thrust derived w.r.t Mach number
+# - [dTh_dM] - thrust derived w.r.t Mach number
 # - [dTh_dtheta_L] - thrust derived w.r.t nominal-flow deflection angle
-# - [dPe_dMach] - internal nozzle exit pressure derived w.r.t to Mach number
+# - [dPe_dM] - internal nozzle exit pressure derived w.r.t to Mach number
 # - [dPe_dtheta_L] - internal nozzle exit pressure derived w.r.t to nominal-flow deflection angle
 # - [P_bar] - pressure ratio, Pe/pressure_freeastram
+# - [pressure_freestram] - free stream static pressure
+# - [Pe] - pressure internal nozzle/engine exit conditions
 # - [I_1] - function of P_bar
 # - [I_2] - function of P_bar
 
@@ -171,10 +174,10 @@ class ObjectiveComponent(om.ExplicitComponent):
 
 # example values used for writing of the stability derivative equations (defining variables)
 u0 = 2400
-w0 = 50
+w0 = -50
 gamma = 1.4
 M = 8
-pressure_static = 1090      #[Pa]
+pressure_freestram = 1090   #[Pa]
 Cpn = 2
 Dp_dH = -0.1765             #[pa/m]
 theta_L = 0.2618            #[rad] = 15deg
@@ -186,40 +189,43 @@ x_es = -39                  #[m] elevator x position w.r.t cog
 z_es = 0                    #[m] elevator z position w.r.t cog
 b = 60                      #[m]
 rho = 0.018                 #[kg/m^3] at 30000 meters
-V_infty = 2414.2            #[m/s] at 30000 meters
+V_infty = 2414.2            #[m/s] at 30000 meters, V_infty = M*sqrt(gamma*R*T)
 z_bar = h/2                 #[m]---negative?
 x_bar = 70                  #[m]---negative?
 l_1 = 64                    #[m] should be: l_1 = (aircraft length)*(inlet fraction)/cos(arctan(h/L*(inlet fraction))) where L is length of aircraft
 L_1 = 60                    #[m] should be: L_1 = (aircraft length)*(inlet fraction)
 l_2 = 50                    #[m] should be: l_2 = (aircraft length)*(outlet fraction)/cos(arctan(h/L*(outlet fraction)))
 L_2 = 40                    #[m] should be: L_1 = (aircraft length)*(inlet fraction)
-dTh_dMach = 50000           #[N/Mach]
-dTh_dtheta_L = -100         # I have no idea for this
-dPe_dMach = 0.5             # I have no idea for this
-dPe_dtheta_L = 0.05         # I have no idea for this
-P_bar = 10
-I_1 = 3                     # I have no idea for this
-I_2 = 2                     # I have no idea for this
+# The four deriivatives below can be found by calling WP Propulsion and
+# evaluating an approx derivative---
+dTh_dM = 50000              # determine from WP Prop---
+dTh_dtheta_L = -100         # determine from WP Prop---
+dPe_dM = 0.5                # determine from WP Prop---
+dPe_dtheta_L = 0.05         # determine from WP Prop---
+P_bar = 290                 # (combustion chamber exit pressure)/(free stream pressure)
+Pe = P_bar*pressure_freestram
+I_1 = ((P_bar-1)-log(P_bar))/(P_bar-1)**2
+I_2 = ((P_bar+1)*log(P_bar)-2*(P_bar-1))/(P_bar-1)**3
 
 q = 0.5*rho*(sqrt(u0**2+w0**2))**2
 V_inf = 0.5*rho*(sqrt(u0**2+w0**2))**2
 
 # Aerodynamic stability derivatives
-X_A_Minf = -gamma*M*pressure_static*Cpn*(sin(theta_L)**2*h+sin(alpha_0+delta_0)**2*sin(delta_0)*S_es/b)
+X_A_Minf = -gamma*M*pressure_freestram*Cpn*(sin(theta_L)**2*h+sin(alpha_0+delta_0)**2*sin(delta_0)*S_es/b)
 
 X_A_alpha = -q*Cpn*(sin(2*theta_L)*h+sin(2*(alpha_0+delta_0))*sin(delta_0)*S_es/b)
 
 X_A_q = q*Cpn*sin(2*theta_L)*h/V_inf*((h-z_bar)*sin(alpha_0)- \
 (L_1-x_bar)*cos(alpha_0) + 0.5*l_1*cos(theta_L))
 
-Z_A_Minf = -gamma*M*pressure_static*Cpn*(sin(theta_L)**2*L_1+sin(alpha_0+delta_0)**2*cos(delta_0)*S_es/b)
+Z_A_Minf = -gamma*M*pressure_freestram*Cpn*(sin(theta_L)**2*L_1+sin(alpha_0+delta_0)**2*cos(delta_0)*S_es/b)
 
 Z_A_alpha = -q*Cpn*(sin(2*theta_L)*L_1+sin(2*(alpha_0+delta_0))*cos(delta_0)*S_es/b)
 
 Z_A_q = q*Cpn*sin(2*theta_L)*L_1/V_inf*((h-z_bar)*sin(alpha_0)- \
 (L_1-x_bar)*cos(alpha_0) + 0.5*l_1*cos(theta_L))
 
-M_A_Minf = pressure_static*gamma*M*Cpn*( sin(theta_L)**2*(0.5*l_1**2-(L_1-x_bar)*L_1-(h-z_bar)*h)+ \
+M_A_Minf = pressure_freestram*gamma*M*Cpn*( sin(theta_L)**2*(0.5*l_1**2-(L_1-x_bar)*L_1-(h-z_bar)*h)+ \
 sin(alpha_0+delta_0)**2*(x_es*cos(delta_0)-z_es*sin(delta_0))*S_es/b )
 
 M_A_alpha = q*Cpn*( sin(2*theta_L)*(0.5*l_1**2-(L_1-x_bar)*L_1-(h-z_bar)*h)+ \
@@ -227,31 +233,31 @@ sin(2*(alpha_0+delta_0))*(x_es*cos(delta_0)-z_es*sin(delta_0))*S_es/b )
 
 M_A_q = -0.5*q*Cpn*sin(2*theta_L)*( l_1**2/V_inf*(2/3*l_1*cos(theta_L)- \ 
 (L_1-x_bar)*cos(alpha_0)+(h-z_bar)*sin(alpha_0))-z_bar/V_inf*(L_1*(L_1-x_bar)+ \ 
-h*(h*z_bar))*(0.5*l_1*cos(theta_L)-(L-x_bar)*cos(alpha_0)+(h-z_bar)*sin(alpha_0)) )
+h*(h-z_bar))*(0.5*l_1*cos(theta_L)-(L-x_bar)*cos(alpha_0)+(h-z_bar)*sin(alpha_0)) )
 
 # Engine-thrust stability derivatives
-X_T_Minf = dTh_dMach
+X_T_Minf = dTh_dM
 X_T_alpha = dTh_dtheta_L
-X_T_q = -1/V_inf*((h*z_bar))*dTh_dtheta_L
+X_T_q = -1/V_inf*((h*z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*dTh_dtheta_L
 
 Z_T_Minf = 0
 Z_T_alpha = 0
 Z_T_q = 0
 
-M_T_Minf = (h-z_bar)*dTh_dMach
+M_T_Minf = (h-z_bar)*dTh_dM
 M_T_alpha = (h-z_bar)*dTh_dtheta_L
-M_T_q = -1/V_inf*((h*z_bar))*(h-z_bar)*dTh_dtheta_L
+M_T_q = -1/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*(h-z_bar)*dTh_dtheta_L
 
 # External nozzle stability derivatives
-X_E_Minf = h*I_1*dPe_dMach
+X_E_Minf = h*I_1*dPe_dM
 X_E_alpha = h*I_1*dPe_dtheta_L
 X_E_q = -h/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*I_1*dPe_dtheta_L
 
-Z_E_Minf = -L_2*I_1*dPe_dMach
+Z_E_Minf = -L_2*I_1*dPe_dM
 Z_E_alpha = -L_2*I_1*dPe_dtheta_L
 Z_E_q = L_2/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*I_1*dPe_dtheta_L
 
-M_E_Minf = (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dMach
+M_E_Minf = (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dM
 M_E_alpha = (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dtheta_L
 M_E_q = -1/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))* \
 (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dtheta_L
