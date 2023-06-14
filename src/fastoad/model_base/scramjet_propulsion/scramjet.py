@@ -35,14 +35,17 @@ class scramjet_calculations():
     def inlet(self):
         #First deflection
         M2, beta2, p2, r2, T2 = oblique(self.params['M_freestream'], self.params['p_freestream'], self.params['r_freestream'], self.params['T_freestream'], self.params['theta_1'], self.params['gamma_inlet'])
+        self.ramp1_vals = {'M': M2, 'p': p2, 'r': r2, 'T': T2}
         #Second deflection
         M3, beta3, p3, r3, T3 = oblique(M2, p2, r2, T2, self.params['theta_2'], self.params['gamma_inlet'])
+        self.ramp2_vals = {'M': M3, 'p': p3, 'r': r3, 'T': T3}
         #Third deflection, into inlet, assumed to be total input to mixer
         M4, beta4, p4, r4, T4 = oblique(M3, p3, r3, T3, self.params['theta_3'], self.params['gamma_inlet'])
 
         # a_out = (self.params['gamma_inlet']*self.params['R']*T4)**0.5
         # v_out = a_out*M4
         # mdot_out = r4*v_out*self.params['A']
+        self.inlet_vals = {'M': M4, 'p': p4, 'r': r4, 'T': T4}
 
         self.inlet_mach = M4
         self.inlet_pressure = p4
@@ -68,6 +71,8 @@ class scramjet_calculations():
         # self.outlet_mach = M2
 
         p2, M2, r2, T2 = mach_2_calculation(self.inlet_mach, self.inlet_pressure, self.inlet_density, self.inlet_temperature, self.params['r_fuel'], self.params['v_fuel'], self.params['T_fuel'], self.params['cp_inlet'], self.params['cp_fuel'], self.params['cp_combustor'], self.params['A'], self.params['ER']*self.inlet_mdot, self.params['hf'], self.params['gamma_combustor'], self.params['R'] )
+        self.outlet_vals = {'M': M2, 'p': p2, 'r': r2, 'T': T2}
+
         self.outlet_pressure = p2
         self.outlet_mach = M2
         self.outlet_density = r2
@@ -79,7 +84,11 @@ class scramjet_calculations():
 
     def nozzle(self):
         M2, p2, r2, T2 = pm_expansion(self.outlet_mach, self.outlet_pressure, self.outlet_density, self.outlet_temperature, self.params['theta_outlet'], self.params['gamma_combustor'])
+        self.fan_vals = {'M': M2, 'p': p2, 'r': r2, 'T': T2}
+        
         Mout, Tout, pout, rout = M_2(p2, self.params['p_freestream'], M2, T2, self.params['gamma_outlet'], self.params['R'])
+        self.exhaust_vals = {'M': Mout, 'p': pout, 'r': rout, 'T': Tout}
+        
         self.exhaust_mach = Mout
         self.exhaust_temperature = Tout
         self.exhaust_pressure = pout
