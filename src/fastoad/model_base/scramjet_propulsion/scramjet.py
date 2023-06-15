@@ -13,10 +13,69 @@ import numpy as np
 
 
 class scramjet_calculations():
+    '''
+    Class representing the components of the scramjet, capable of performing all relevant calculations
+    ...
+    Input Attributes:
+    --------
+    scale_factors : dict
+        Dictionary containing the two scale factors for x and y coordinates. Formatted as follows:
+        scale_factors = {'x_scale':1, 'y_scale':1}
+    input_vals : dict
+        Dictionary containing all other necessary values for engine calculations including things such as specific heats and ratios for
+        the intake, combustor inlet, combustor outlet, and nozzle, freestream flow properties, equivalence ratio, lower heating value, 
+        and other fuel characteristics. Formatted as follows:
+        input_vals = {'M_freestream': 8, 'p_freestream':1090.16, 'r_freestream':0.0167207, 'T_freestream':227.130, 'gamma_inlet':1.401,
+                       'R':287.05, 'r_fuel':42, 'v_fuel':209.87, 'T_fuel':150, 'cp_inlet':1006, 'cp_fuel':12820, 'cp_combustor':1287.5,
+                       'ER':0.029, 'hf':120e6, 'gamma_combustor':1.2869, 'gamma_outlet':1.31, 'alpha': 0,
+                        }
+    Output Attributes:
+    --------
+    x_coordinates : ndarray
+    y_coordinates : ndarray
+        Arrays containing x and y coords of points associated with engine geometry. Refer to documentation for layout correspondance
+    ramp1_vals : dict
+    ramp2_vals : dict
+    inlet_vals : dict
+    outlet_vals : dict
+    exhaust_vals : dict
+        Dictionaries containing flow properties at each point along the engine. Formatted as follows (All use common keys):
+        self.ramp1_vals = {'M': M2, 'p': p2, 'r': r2, 'T': T2}
+    inlet_mdot : float
+    mdot_fuel : float
+        Mass flow rates at the inlet and outlet of the combustor
+    engine_thrust : float
+        Net engine thrust
+        
+    Methods:
+    --------
+    define_geometry()
+        Stretches default geometry based on scale factors and assembles full dictionary of values to be used in calculations
+    inlet()
+        Uses series of oblique shocks to calculate properties at inlet of the combustion chamber
+    combustor()
+        Uses Rayleigh flow assumptions to estimate properties at outlet of combustor
+    nozzle()
+        Uses Prandtl-Meyer expansion fan and isentropic equations to calculate outlet properties assuming perfectly expanded flow
+    thrust()
+        Estimates net engine thrust based on conservation of momentum. With the assumption of invsicid flow, this includes the momentum
+        drag
+    Relevant 
+    '''
     def __init__(self, scale_factors, input_vals):
         self.geo = scale_factors
         self.vals = input_vals
-
+        self.x_coordinates = None
+        self.y_coordinates = None
+        self.ramp1_vals = None
+        self.ramp2_vals = None
+        self.inlet_vals = None
+        self.inlet_mdot = None
+        self.outlet_vals = None
+        self.mdot_fuel = None
+        self.exhaust_vals = None
+        self.engine_thrust = None
+        
     def define_geometry(self):
         x_default = np.array([0, 2.68165, 4.05500, 3.75976, 5.65000, 8.00000])
         y_default = np.array([0, 0.26383, 0.73307, 1, 0.73307, 0])
@@ -24,13 +83,18 @@ class scramjet_calculations():
         x = x_default*self.geo['x_scale']
         y = y_default*self.geo['y_scale']
 
-        theta1 = np.arctan2(y[1], x[1])
-        theta2 = np.arctan2(y[2]-y[1], x[2]-x[1]) - theta1
+        self.x_coordinates = x
+        self.y_coordinates = y
+
+        alpha = self.vals['alpha']
+
+        theta1 = np.arctan2(y[1], x[1]) + alpha
+        theta2 = np.arctan2(y[2]-y[1], x[2]-x[1]) - np.arctan2(y[1], x[1])
         theta3 = np.arctan2(y[2]-y[1], x[2]-x[1])
         theta_outlet = np.arctan2(y[4]-y[5], x[5]-x[4])
         A = y[3] - y[2]
 
-        self.params = {'M_freestream': self.vals['M_freestream'], 'p_freestream':self.vals['p_freestream'], 'r_freestream':self.vals['r_freestream'], 'T_freestream':self.vals['T_freestream'], 'theta_1':theta1, 'gamma_inlet':self.vals['gamma_inlet'], 'theta_2':theta2, 'theta_3':theta3, 'R':self.vals['R'], 'r_fuel':self.vals['r_fuel'], 'v_fuel':self.vals['v_fuel'], 'T_fuel':self.vals['T_fuel'], 'cp_inlet':self.vals['cp_inlet'], 'cp_fuel':self.vals['cp_fuel'], 'cp_combustor':self.vals['cp_combustor'], 'ER':self.vals['ER'], 'hf':self.vals['hf'], 'gamma_combustor':self.vals['gamma_combustor'], 'theta_outlet':theta_outlet, 'gamma_outlet':self.vals['gamma_outlet'], 'A':A}
+        self.params = {'M_freestream': self.vals['M_freestream'], 'p_freestream':self.vals['p_freestream'], 'r_freestream':self.vals['r_freestream'], 'T_freestream':self.vals['T_freestream'], 'theta_1':theta1, 'gamma_inlet':self.vals['gamma_inlet'], 'theta_2':theta2, 'theta_3':theta3, 'R':self.vals['R'], 'r_fuel':self.vals['r_fuel'], 'v_fuel':self.vals['v_fuel'], 'T_fuel':self.vals['T_fuel'], 'cp_inlet':self.vals['cp_inlet'], 'cp_fuel':self.vals['cp_fuel'], 'cp_combustor':self.vals['cp_combustor'], 'ER':self.vals['ER'], 'hf':self.vals['hf'], 'gamma_combustor':self.vals['gamma_combustor'], 'theta_outlet':theta_outlet, 'gamma_outlet':self.vals['gamma_outlet'], 'A':A, 'alpha':self.vals['alpha']}
 
     def inlet(self):
         #First deflection
@@ -106,8 +170,16 @@ class scramjet_calculations():
         self.engine_thrust = F
 
 class scramjet(scramjet_calculations):
+    '''
+    Runs all methods from scramjet_calculations using the same arguments, in order to simplify syntax in larger program
+    ...
+    Method:
+    -------
+    run()
+        Exectutes all scramjet calculations
+    '''
     def __init__(self, scale_factors, input_vals):
-      super().__init__(scale_factors, input_vals)
+        super().__init__(scale_factors, input_vals)
 
     def run(self):
         super().define_geometry()
@@ -115,6 +187,31 @@ class scramjet(scramjet_calculations):
         super().combustor()
         super().nozzle()
         super().thrust()
+
+        return self
+
+class parametrize_scramjet(scramjet):
+    def __init__(self, alpha_array, mach_array, scale_factors_nominal, input_vals_nominal):
+        self.alpha_array = alpha_array
+        self.mach_array = mach_array
+        self.scale_factors = scale_factors_nominal
+        self.input_vals = input_vals_nominal
+        # super().__init__(scale_factors_nominal, input_vals_nominal)
+    
+    def parametrize_alpha(self):
+        data_array = []
+
+        for i in range(len(self.alpha_array)):
+            self.input_vals['alpha'] = self.alpha_array[i]
+            super().__init__(self.scale_factors, self.input_vals)
+            x = super().run()
+            data_array.append(x)
+
+        return data_array
+
+    def parametrize_mach(self):
+
+        pass
 
 
 
