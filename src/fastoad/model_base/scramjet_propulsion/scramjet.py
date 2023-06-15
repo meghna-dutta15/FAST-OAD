@@ -190,28 +190,4 @@ class scramjet(scramjet_calculations):
 
         return self
 
-class parametrize_scramjet(scramjet):
-    def __init__(self, alpha_array, mach_array, scale_factors_nominal, input_vals_nominal):
-        self.alpha_array = alpha_array
-        self.mach_array = mach_array
-        self.scale_factors = scale_factors_nominal
-        self.input_vals = input_vals_nominal
-        # super().__init__(scale_factors_nominal, input_vals_nominal)
-    
-    def parametrize_alpha(self):
-        data_array = []
-
-        for i in range(len(self.alpha_array)):
-            self.input_vals['alpha'] = self.alpha_array[i]
-            super().__init__(self.scale_factors, self.input_vals)
-            x = super().run()
-            data_array.append(x)
-
-        return data_array
-
-    def parametrize_mach(self):
-
-        pass
-
-
 
