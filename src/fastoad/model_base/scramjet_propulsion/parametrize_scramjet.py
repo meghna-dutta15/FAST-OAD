@@ -49,3 +49,26 @@ class parametrize_scramjet():
             data_array.append(temp)
 
         return data_array
+
+
+    def parametrize_x(self):
+        data_array = []
+
+        for i in range(len(self.x_scale_array)):
+            self.scale_factors['x_scale'] = self.x_scale_array[i]
+            data = scramjet(self.scale_factors, self.input_vals)
+            data.run()
+            data_array.append(data)
+
+        return data_array
+    
+    def parametrize_y(self):
+        data_array = []
+
+        for i in range(len(self.y_scale_array)):
+            self.scale_factors['y_scale'] = self.y_scale_array[i]
+            data = scramjet(self.scale_factors, self.input_vals)
+            data.run()
+            data_array.append(data)
+
+        return data_array
