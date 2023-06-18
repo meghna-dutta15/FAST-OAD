@@ -112,12 +112,26 @@ class scramjet_calculations():
         self.inlet_vals = {'M': M4, 'p': p4, 'r': r4, 'T': T4}
 
         self.inlet_mach = M4
+
+        if M4<1:
+            raise ValueError("Inlet mach less than 1. Caught value: " + str(M4))
+        
+        if np.isnan(M4) == True:
+            raise ValueError("Inlet mach NaN")
+        
         self.inlet_pressure = p4
         self.inlet_density = r4
         self.inlet_temperature = T4
         a = (self.params['gamma_inlet'] * self.params['R'] * T4)**0.5
         vin = M4*a
         self.inlet_velocity = vin
+
+        if vin<0:
+            raise ValueError("Inlet velocity less than 0. Caught value: " + str(vin))
+        
+        if np.isnan(vin) == True:
+            raise ValueError("Inlet velocity NaN")
+
         mdot_inlet = r4*self.params['A']*vin
         # a_freestream = (self.params['gamma_inlet'] * self.params['R'] * self.params['T_freestream'])**0.5
         # v_freestream = self.params['M_freestream']*a_freestream
@@ -146,6 +160,18 @@ class scramjet_calculations():
 
         self.mdot_fuel = self.params['ER']*self.inlet_mdot
 
+        if M2<1:
+            raise ValueError("Combustor mach less than 1. Caught value: " + str(M2))
+        
+        if np.isnan(M2) == True:
+            raise ValueError("Combustor mach NaN")
+        
+        if M2*a<0:
+            raise ValueError("Combustor velocity less than 0. Caught value: " + str(M2*a))
+        
+        if np.isnan(M2*a) == True:
+            raise ValueError("Combustor velocity NaN")
+
     def nozzle(self):
         M2, p2, r2, T2 = pm_expansion(self.outlet_mach, self.outlet_pressure, self.outlet_density, self.outlet_temperature, self.params['theta_outlet'], self.params['gamma_combustor'])
         self.fan_vals = {'M': M2, 'p': p2, 'r': r2, 'T': T2}
@@ -161,6 +187,18 @@ class scramjet_calculations():
         vout = Mout*a
         self.exhaust_velocity = vout
 
+        if Mout<1:
+            raise ValueError("Exhaust mach less than 1. Caught value: " + str(Mout))
+        
+        if np.isnan(Mout) == True:
+            raise ValueError("Exhaust mach NaN")
+        
+        if vout<0:
+            raise ValueError("Exhaust velocity less than 0. Caught value: " + str(vout))
+        
+        if np.isnan(vout) == True:
+            raise ValueError("Exhaust velocity NaN")
+
     def thrust(self):
         a_freestream = (self.params['gamma_inlet'] * self.params['R'] * self.params['T_freestream'])**0.5
         v_freestream = self.params['M_freestream']*a_freestream
@@ -168,6 +206,12 @@ class scramjet_calculations():
         self.returnable = self.params['r_freestream']*(v_freestream)*0.787
         F = (self.inlet_mdot + self.mdot_fuel)*self.exhaust_velocity - self.inlet_mdot*v_freestream
         self.engine_thrust = F
+
+        if F<0:
+            raise ValueError("Thrust less than 0. Caught value: " + str(F))
+        
+        if np.isnan(F) == True:
+            raise ValueError("Thrust NaN")
 
 class scramjet(scramjet_calculations):
     '''
