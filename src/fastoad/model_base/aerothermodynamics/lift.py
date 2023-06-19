@@ -1,4 +1,4 @@
-from math import log10, sqrt, exp, sin, pi
+from math import log10, sqrt, exp, sin, pi, tan
 
 ###################################################################################
 ## Aerodynamic Calculations
@@ -27,3 +27,24 @@ def calculateLiftNasaHypersonicPaper(mach, AR, dynamicPressure, alpha, area):
 
     return c1 * sin(alpha * pi / 180) + c2 * sin(alpha*pi/180)^2 * dynamicPressure *area
 
+class WingGeometry():
+    def __init__(self, length):
+        self.length = length
+        self.sweep = 60
+        self.AR = 4 / tan(self.sweep)
+        self.width = self.length * self.AR / 2
+        self.planform_area = self.width**2 / self.AR 
+        self.max_cross_a = 1
+        self.max_cross_b = 2
+        self.max_cross_area = pi * self.max_cross_a * self.max_cross_b
+        self.thickness = self.cross_a / self.cross_b
+        self.MAC = 
+
+class Aerodynamics():
+    def __init__(self, target_thrust, length, ):
+        self.lift  = 0
+        self.AR = 1
+        self.alpha = 0
+        self.
+
+    
