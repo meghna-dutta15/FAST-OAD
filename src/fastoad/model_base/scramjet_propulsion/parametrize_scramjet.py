@@ -72,3 +72,4 @@ class parametrize_scramjet():
             data_array.append(data)
 
         return data_array
+    

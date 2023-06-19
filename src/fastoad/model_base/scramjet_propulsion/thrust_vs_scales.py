@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 input_vals = {'M_freestream': 8, 'p_freestream':1090.16, 'r_freestream':0.0167207, 'T_freestream':227.130, 'gamma_inlet':1.401, 'R':287.05, 'r_fuel':42, 'v_fuel':209.87, 'T_fuel':150, 'cp_inlet':1006, 'cp_fuel':12820, 'cp_combustor':1287.5, 'ER':0.029, 'hf':120e6, 'gamma_combustor':1.2869, 'gamma_outlet':1.31, 'alpha':0}
 scale_factors = {'x_scale':1, 'y_scale':1}
 
-x_scale_array = np.linspace(0.9,3,num=100)
+x_scale_array = np.linspace(1,3,num=100)
 y_scale_array = np.linspace(0.1,1.1,num=100)
 
 # data = parametrize_scramjet(scale_factors, input_vals, x_scale_array=x_scale_array, y_scale_array=y_scale_array)
@@ -43,9 +43,10 @@ plt.xlabel('Horizontal Scale', fontsize = 15)
 plt.ylabel('Net Thrust (kN)', fontsize = 15)
 plt.title('Thrust vs x Scale', fontsize = 15)
 plt.plot(x_scale_array, thrust_array2/1000)
+plt.savefig('src/fastoad/model_base/scramjet_propulsion/plots/xscale.png')
 plt.show()
 
-
+#######################################################
 input_vals = {'M_freestream': 8, 'p_freestream':1090.16, 'r_freestream':0.0167207, 'T_freestream':227.130, 'gamma_inlet':1.401, 'R':287.05, 'r_fuel':42, 'v_fuel':209.87, 'T_fuel':150, 'cp_inlet':1006, 'cp_fuel':12820, 'cp_combustor':1287.5, 'ER':0.029, 'hf':120e6, 'gamma_combustor':1.2869, 'gamma_outlet':1.31, 'alpha':0}
 scale_factors = {'x_scale':1, 'y_scale':1}
 
@@ -68,6 +69,7 @@ plt.xlabel('Vertical Scale', fontsize = 15)
 plt.ylabel('Net Thrust (kN)', fontsize = 15)
 plt.title('Thrust vs y Scale', fontsize = 15)
 plt.plot(y_scale_array, thrust_array2/1000)
+plt.savefig('src/fastoad/model_base/scramjet_propulsion/plots/yscale.png')
 plt.show()
 
 

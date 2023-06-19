@@ -50,11 +50,12 @@ nozzle_y_dense = nozzle_func(nozzle_x_dense)
 
 plt.plot(nozzle_x_dense, nozzle_y_dense, label = 'Nozzle')
 
-plt.xlabel('X Position Along Engine', fontsize = 15)
+plt.xlabel('X Position Along Engine (m)', fontsize = 15)
 plt.ylabel('Static Pressure (kPa)', fontsize = 15)
 plt.title('Pressure Distribution Throughout Engine', fontsize = 15)
 
 plt.legend()
+plt.savefig('src/fastoad/model_base/scramjet_propulsion/plots/pressure.png')
 plt.show()
 
 
@@ -89,11 +90,12 @@ nozzle_y_dense = nozzle_func(nozzle_x_dense)
 
 plt.plot(nozzle_x_dense, nozzle_y_dense, label = 'Nozzle')
 
-plt.xlabel('X Position Along Engine', fontsize = 15)
+plt.xlabel('X Position Along Engine (m)', fontsize = 15)
 plt.ylabel('Static Temperature (K)', fontsize = 15)
 plt.title('Temperature Distribution Throughout Engine', fontsize = 15)
 
 plt.legend()
+plt.savefig('src/fastoad/model_base/scramjet_propulsion/plots/temperature.png')
 plt.show()
 
 
@@ -128,10 +130,11 @@ nozzle_y_dense = nozzle_func(nozzle_x_dense)
 
 plt.plot(nozzle_x_dense, nozzle_y_dense, label = 'Nozzle')
 
-plt.xlabel('X Position Along Engine', fontsize = 15)
+plt.xlabel('X Position Along Engine (m)', fontsize = 15)
 plt.ylabel('Mach #', fontsize = 15)
 plt.title('Flow Mach # Throughout Engine', fontsize = 15)
 
 plt.legend()
+plt.savefig('src/fastoad/model_base/scramjet_propulsion/plots/mach.png')
 plt.show()
 

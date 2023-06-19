@@ -6,11 +6,7 @@ input_vals = {'M_freestream': 8, 'p_freestream':1090.16, 'r_freestream':0.016720
 scale_factors = {'x_scale':1, 'y_scale':1}
 
 data = scramjet(scale_factors, input_vals)
-data.define_geometry()
-data.inlet()
-data.combustor()
-data.nozzle()
-data.thrust()
+data.run()
 
 print('Inlet Values:')
 print(data.inlet_temperature)
@@ -40,3 +36,7 @@ print('')
 print('Thrust:')
 print(data.engine_thrust)
 print(data.returnable)
+
+
+
+

@@ -27,6 +27,7 @@ plt.xlabel('Freestream Mach', fontsize = 15)
 plt.ylabel('Net Thrust (kN)', fontsize = 15)
 plt.title('Thrust vs Mach', fontsize = 15)
 plt.plot(mach_array, thrust_array2/1000)
+plt.savefig('src/fastoad/model_base/scramjet_propulsion/plots/thrustvmach.png')
 plt.show()
 
 
