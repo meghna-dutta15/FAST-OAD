@@ -28,6 +28,7 @@ def mach_2_calculation(Min, pin, rin, Tin, rf, vf, Tf, cpin, cpf, cpc, A, mdotf,
     
     Tt2_Tt1 = T_t_2 / T_t_1
     root = root_scalar(solve_rayleigh_stagnation_temperature, x0=2, x1=3, args=(Min, Tt2_Tt1, gamma))
+    #root = root_scalar(solve_rayleigh_stagnation_temperature, bracket=[0,30], args=(Min, Tt2_Tt1, gamma),method='toms748')
     M2 = root.root
 
     def get_rayleigh_pressure_ratio(mach_1, mach_2, gamma=1.4):

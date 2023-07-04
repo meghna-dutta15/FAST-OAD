@@ -37,11 +37,43 @@ print('Thrust:')
 print(data.engine_thrust)
 print(data.returnable)
 
+print('')
+print('')
+
 cfd_p1 = 3160
 spread_p1 = 3360
+fast_p1 = data.ramp1_vals['p']
+p1_diff = abs(fast_p1-cfd_p1)/cfd_p1*100
 
 cfd_p2 = 17400
 spread_p2 = 17800
+fast_p2 = data.ramp2_vals['p']
+p2_diff = abs(fast_p2-cfd_p2)/cfd_p2*100
 
-cfd_p3 = 95800 #Very approximate 
-spread_p3 = 97100
+cfd_pinlet = 102000 #Very approximate 
+spread_pinlet = 102000
+fast_pinlet = data.inlet_vals['p']
+pinlet_diff = abs(fast_pinlet-cfd_pinlet)/cfd_pinlet*100
+
+cfd_poutlet = 330000
+spread_poutlet = 322000
+fast_poutlet = data.outlet_vals['p']
+poutlet_diff = abs(fast_poutlet-cfd_poutlet)/cfd_poutlet*100
+
+print(fast_p1)
+print(p1_diff)
+print('')
+
+print(fast_p2)
+print(p2_diff)
+print('')
+
+print(fast_pinlet)
+print(pinlet_diff)
+print('')
+
+print(fast_poutlet)
+print(poutlet_diff)
+
+
+
