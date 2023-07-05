@@ -204,11 +204,26 @@ dPe_dM = 0.5                # determine from WP Prop---
 dPe_dtheta_L = 0.05         # determine from WP Prop---
 P_bar = 290                 # (combustion chamber exit pressure)/(free stream pressure)
 Pe = P_bar*pressure_freestram
+dPfree_dH = -0.15
 I_1 = ((P_bar-1)-log(P_bar))/(P_bar-1)**2
 I_2 = ((P_bar+1)*log(P_bar)-2*(P_bar-1))/(P_bar-1)**3
 
 q = 0.5*rho*(sqrt(u0**2+w0**2))**2
 V_inf = 0.5*rho*(sqrt(u0**2+w0**2))**2
+
+# External nozzle stability derivatives
+#X_E_Minf = h*I_1*dPe_dM
+#X_E_alpha = h*I_1*dPe_dtheta_L
+#X_E_q = -h/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*I_1*dPe_dtheta_L
+
+#Z_E_Minf = -L_2*I_1*dPe_dM
+#Z_E_alpha = -L_2*I_1*dPe_dtheta_L
+#Z_E_q = L_2/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*I_1*dPe_dtheta_L
+
+#M_E_Minf = (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dM
+#M_E_alpha = (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dtheta_L
+#M_E_q = -1/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))* \
+#(((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dtheta_L
 
 # Aerodynamic stability derivatives
 X_A_Minf = -gamma*M*pressure_freestram*Cpn*(sin(theta_L)**2*h+sin(alpha_0+delta_0)**2*sin(delta_0)*S_es/b)
@@ -248,47 +263,26 @@ M_T_Minf = (h-z_bar)*dTh_dM
 M_T_alpha = (h-z_bar)*dTh_dtheta_L
 M_T_q = -1/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*(h-z_bar)*dTh_dtheta_L
 
-# External nozzle stability derivatives
-X_E_Minf = h*I_1*dPe_dM
-X_E_alpha = h*I_1*dPe_dtheta_L
-X_E_q = -h/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*I_1*dPe_dtheta_L
-
-Z_E_Minf = -L_2*I_1*dPe_dM
-Z_E_alpha = -L_2*I_1*dPe_dtheta_L
-Z_E_q = L_2/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))*I_1*dPe_dtheta_L
-
-M_E_Minf = (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dM
-M_E_alpha = (((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dtheta_L
-M_E_q = -1/V_inf*((h-z_bar)*sin(alpha_0)-(L_1-x_bar)*cos(alpha_0))* \
-(((h-z_bar)*h-(L_1-x_bar)*L_2)*I_1-l_2**2*I_2)*dPe_dtheta_L
+# correction coefficient for dynamics matrix
+c1 = M/pressure_freestram*dPfree_dH
 
 # Components to dynamics matrix A
-a11 = 0
-a12 = 0
-a13 = 0
-a14 = 0
-a15 = 0
+a11 = c1 * (X_A_Minf + X_T_Minf) / (alpha_trim * vehicle_mass)
+a21 = c1 * (Z_A_Minf) / (alpha_trim * vehicle_mass)
+a31 = 0
+a41 = c1 * (M_A_Minf + M_T_Minf) / (alpha_trim * inertia.yy)
 
-a21 = (X_A_Minf+X_T_Minf+X_E_Minf)/vehicle_mass
-a22 = (X_A_alpha+X_T_alpha+X_E_alpha)/vehicle_mass
-a23 = (X_A_q+X_T_q+X_E_q)/vehicle_mass
-a24 = 0
-a25 = 0
+a12 = c1 * (X_A_alpha + X_T_alpha) / (vehicle_mass)
+a22 = c1 * (Z_A_alpha) / (vehicle_mass)
+a32 = 0
+a42 = c1 * (M_A_alpha + M_T_alpha) / (inertia.yy)
 
-a31 = (Z_A_Minf+Z_T_Minf+Z_E_Minf)/(vehicle_mass*u0)
-a32 = (Z_A_alpha+Z_T_alpha+Z_E_alpha)/(vehicle_mass*u0)
-a33 = (Z_A_q+Z_T_q+Z_E_q)/(vehicle_mass*u0)
-a34 = 0
-a35 = 0
-
-a41 = 0
-a42 = 0
+a13 = -g
+a23 = 0
+a33 = 0
 a43 = 0
-a44 = 0
-a45 = 0
 
-a31 = (M_A_Minf+M_T_Minf+M_E_Minf)/inertia.yy
-a32 = (M_A_alpha+M_T_alpha+M_E_alpha)/inertia.yy
-a33 = (M_A_q+M_T_q+M_E_q)/inertia.yy
-a34 = 0
-a35 = 0
+a14 = c1 * (X_A_q + X_T_q) / (vehicle_mass)
+a24 = u0 + c1 * (Z_A_q) / (vehicle_mass)
+a34 = 1
+a44 = c1 * (M_A_q + M_T_q) / (inertia.yy)
