@@ -303,6 +303,6 @@ a33 = 0
 a43 = 0
 
 a14 = c1 * (X_A_q + X_T_q) / (vehicle_mass)
-a24 = u0 + c1 * (Z_A_q) / (vehicle_mass)
+a24 = c1 * (Z_A_q) / (vehicle_mass)
 a34 = 1
 a44 = c1 * (M_A_q + M_T_q) / (inertia.yy)
