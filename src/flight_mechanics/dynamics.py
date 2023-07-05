@@ -9,7 +9,8 @@ import openmdao as om
 class dynamicsMatrixGeneration:
     def __init__(
             self,
-            eulerAngles: float[3]
+            eulerAngles: float[3],
+            
     ):
         self.eulerAngles = eulerAngles
         self.phi = eulerAngles[0]
