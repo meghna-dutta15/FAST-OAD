@@ -1,15 +1,11 @@
 import openmdao.api as om
 import numpy as np
 from math import sin, cos, atan, sqrt, log 
+from numpy.linalg import eig
 
 # import atmospheric parameters
 # import force and moment coefficients
 # import weight distribution parameters (inertia tensor, center of gravity, vehicle mass, and more)
-
-# General thoughts:
-# - Where is the origin of the aircraft?
-# - The functions must be simplified, i.e. make matrices and performs matrix multiplications etc, if possible
-# - Nicely import relevant parameters and their value from other WPs and name them, how?
 
 # Parameters TODO: will be changed for when looping
 # intertias defined as per mass [kg/m^2/kg]
@@ -306,3 +302,11 @@ a14 = c1 * (X_A_q + X_T_q) / (vehicle_mass)
 a24 = c1 * (Z_A_q) / (vehicle_mass)
 a34 = 1
 a44 = c1 * (M_A_q + M_T_q) / (inertia.yy)
+
+A = np.array([[a11, a12, a13, a14], 
+              [a21, a22, a23, a24],
+              [a31, a32, a33, a34]
+              [a41, a42, a43, a44]])
+w,v=eig(A)
+print('E-value:', w)
+print('E-vector', v)
