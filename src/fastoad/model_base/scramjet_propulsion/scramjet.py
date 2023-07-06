@@ -93,6 +93,7 @@ class scramjet_calculations():
         theta3 = np.arctan2(y[2]-y[1], x[2]-x[1])
         theta_outlet = np.arctan2(y[4]-y[5], x[5]-x[4])
         A = y[3] - y[2]
+        self.angles = [theta1, theta2, theta3, theta_outlet]
 
         self.params = {'M_freestream': self.vals['M_freestream'], 'p_freestream':self.vals['p_freestream'], 'r_freestream':self.vals['r_freestream'], 'T_freestream':self.vals['T_freestream'], 'theta_1':theta1, 'gamma_inlet':self.vals['gamma_inlet'], 'theta_2':theta2, 'theta_3':theta3, 'R':self.vals['R'], 'r_fuel':self.vals['r_fuel'], 'v_fuel':self.vals['v_fuel'], 'T_fuel':self.vals['T_fuel'], 'cp_inlet':self.vals['cp_inlet'], 'cp_fuel':self.vals['cp_fuel'], 'cp_combustor':self.vals['cp_combustor'], 'ER':self.vals['ER'], 'hf':self.vals['hf'], 'gamma_combustor':self.vals['gamma_combustor'], 'theta_outlet':theta_outlet, 'gamma_outlet':self.vals['gamma_outlet'], 'A':A, 'alpha':self.vals['alpha']}
 

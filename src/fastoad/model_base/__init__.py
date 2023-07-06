@@ -17,3 +17,5 @@ Base features for FAST-OAD models
 
 from .atmosphere import Atmosphere, AtmosphereSI
 from .flight_point import FlightPoint
+import scramjet_propulsion
+import aerothermodynamics
